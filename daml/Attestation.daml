@@ -2,27 +2,47 @@ module Attestation where
 
 import Identity
 
+-- Standardized claim types used across CantonID Vault
+data ClaimType
+  = KYC_VERIFIED
+  | AML_CLEAR
+  | ACCREDITED_INVESTOR
+  | RWA_ELIGIBLE
+  deriving (Eq, Show)
+
 template Attestation
   with
-    issuer     : Party              -- bank / KYC / compliance provider
-    subject    : Party              -- owner of the identity
-    identityId : Text               -- links to Identity.identityId
-    claimType  : Text               -- e.g. "KYC_VERIFIED", "AML_CLEAR"
-    dataHash   : Text               -- hash of off-ledger docs
-    validUntil : Time
-    revoked    : Bool
+    issuer      : Party                      -- bank / KYC / compliance provider
+    subject     : Party                      -- owner of the identity
+    identityCid : ContractId Identity.Identity -- link to the on-ledger Identity
+    claimType   : ClaimType                  -- standardized claim type
+    dataHash    : Text                       -- hash of off-ledger documents
+    validFrom   : Time
+    validUntil  : Time
+    revoked     : Bool
   where
     signatory issuer
     observer subject
 
+    -- Mark attestation as revoked by the issuer
     choice Revoke : ContractId Attestation
       controller issuer
       do
+        assertMsg "Already revoked" (not revoked)
         create this with revoked = True
 
+    -- Extend validity period if issuer revalidates the subject
     choice ExtendValidity : ContractId Attestation
       with
         newValidUntil : Time
       controller issuer
       do
+        assertMsg "New expiry must be in the future" (newValidUntil > validUntil)
         create this with validUntil = newValidUntil
+
+-- Helper function to check if an attestation is active at a given time
+isActive : Attestation -> Time -> Bool
+isActive att now =
+  (not att.revoked)
+    && att.validFrom <= now
+    && now <= att.validUntil
