@@ -21,6 +21,8 @@ template Identity
         newObserver : Party
       controller owner
       do
+        assertMsg "Observer already added" (notElem newObserver extraObservers)
+        archive self
         create this with
           extraObservers = newObserver :: extraObservers
 
@@ -28,10 +30,14 @@ template Identity
     choice Deactivate : ContractId Identity
       controller owner
       do
+        assertMsg "Already suspended" (status == Active)
+        archive self
         create this with status = Suspended
 
     -- Reactivate identity after checks are cleared
     choice Reactivate : ContractId Identity
       controller owner
       do
+        assertMsg "Already active" (status == Suspended)
+        archive self
         create this with status = Active
