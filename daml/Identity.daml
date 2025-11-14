@@ -1,0 +1,21 @@
+module Identity where
+
+template Identity
+  with
+    owner      : Party
+    identityId : Text
+    name       : Text
+    status     : Text   -- "active", "suspended"
+  where
+    signatory owner
+    observer owner
+
+    choice Deactivate : ContractId Identity
+      controller owner
+      do
+        create this with status = "suspended"
+
+    choice Reactivate : ContractId Identity
+      controller owner
+      do
+        create this with status = "active"
