@@ -1,0 +1,28 @@
+module Attestation where
+
+import Identity
+
+template Attestation
+  with
+    issuer     : Party              -- bank / KYC / compliance provider
+    subject    : Party              -- owner of the identity
+    identityId : Text               -- links to Identity.identityId
+    claimType  : Text               -- e.g. "KYC_VERIFIED", "AML_CLEAR"
+    dataHash   : Text               -- hash of off-ledger docs
+    validUntil : Time
+    revoked    : Bool
+  where
+    signatory issuer
+    observer subject
+
+    choice Revoke : ContractId Attestation
+      controller issuer
+      do
+        create this with revoked = True
+
+    choice ExtendValidity : ContractId Attestation
+      with
+        newValidUntil : Time
+      controller issuer
+      do
+        create this with validUntil = newValidUntil
