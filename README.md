@@ -80,8 +80,7 @@ User accesses RWA, lending, custody and OTC without repeating KYC.
 
 daml/Identity.daml  
 daml/Attestation.daml  
-mockups/  
-prototype/  
+mockups/ 
 README.md  
 
 ---
