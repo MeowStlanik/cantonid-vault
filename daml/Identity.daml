@@ -1,21 +1,37 @@
 module Identity where
 
+-- Basic lifecycle status for an on-ledger identity
+data Status = Active | Suspended
+  deriving (Eq, Show)
+
 template Identity
   with
-    owner      : Party
-    identityId : Text
-    name       : Text
-    status     : Text   -- "active", "suspended"
+    owner          : Party
+    identityId     : Text    -- stable id that other contracts can reference
+    name           : Text    -- human readable name
+    status         : Status  -- Active or Suspended
+    extraObservers : [Party] -- applications that are allowed to see this identity
   where
     signatory owner
-    observer owner
+    observer owner, extraObservers
 
+    -- Add an additional observer application that can see this identity
+    choice AddObserver : ContractId Identity
+      with
+        newObserver : Party
+      controller owner
+      do
+        create this with
+          extraObservers = newObserver :: extraObservers
+
+    -- Suspend identity (for example, blocked or under review)
     choice Deactivate : ContractId Identity
       controller owner
       do
-        create this with status = "suspended"
+        create this with status = Suspended
 
+    -- Reactivate identity after checks are cleared
     choice Reactivate : ContractId Identity
       controller owner
       do
-        create this with status = "active"
+        create this with status = Active
