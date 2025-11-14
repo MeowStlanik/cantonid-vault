@@ -1,178 +1,101 @@
-CantonID Vault – A Unified, Privacy Preserving Identity and Compliance Layer for the Canton Network
+# CantonID Vault – Privacy-Preserving Compliance Layer for Canton
 
-CantonID Vault is a shared identity and compliance layer for the Canton Network. It enables one-time KYC and reusable attestations that any regulated Canton application can rely on without exposing user data. The system provides private on-ledger identities and standardized compliance attestations issued by trusted entities.
+CantonID Vault provides one-time KYC and reusable, private attestations for Canton applications.  
+Apps never store documents or run KYC repeatedly – they only verify claim types through Canton’s privacy model.
 
-1. Problem
-Regulated financial workflows such as RWA issuance, institutional lending, OTC settlement and custody require:
-- verified identity
-- KYC and AML screening
-- accreditation checks
-- revocation and expiry
-- strict privacy controls
+---
 
-Public blockchains leak identity-related data, making them unusable for institutional-level compliance.
+## Why
 
-Canton provides identity primitives only for system participants, not for real users or organizations. This forces every application to reinvent KYC from scratch:
-- separate identity storage
-- separate attestation logic
-- separate KYC provider integrations
-- separate onboarding flows
-- application-specific compliance rules
+Regulated workflows (RWA, lending, OTC, custody) require KYC, AML, accreditation, revocation and strict privacy.  
+Today each Canton application reimplements this separately, causing duplicated onboarding, inconsistent compliance and increased data risk.
 
-This leads to:
-- fragmentation: identical logic duplicated across apps
-- poor user experience: users must redo KYC repeatedly
-- inconsistent compliance enforcement
-- larger attack surface due to multiple independent KYC stores
-- unnecessary risk from off-ledger copies of sensitive documents
+---
 
-There is currently no shared, private and reusable KYC and AML layer that multiple Canton applications can trust.
+## What It Provides
 
-2. Solution – CantonID Vault
-CantonID Vault introduces a minimal, standardized compliance layer based on two core templates:
-
-Identity Contract  
-A non-transferable private identity representing a user or organization with:
+Identity Contract:
+- private, non-transferable on-ledger identity
 - stable identityId
-- lifecycle status (active or suspended)
-- controlled access via observers
-- optional metadata
+- active/suspended status
+- visibility controlled via observers
 
-Attestation Contract  
-Issued by regulated entities (banks, brokers, KYC providers). Contains:
-- claimType (KYC_VERIFIED, AML_CLEAR, ACCREDITED_INVESTOR, RWA_ELIGIBLE)
-- validity window
-- revocation status
+Attestation Contract:
+- issued by trusted entities (banks, brokers, KYC providers)
+- standardized claimType (KYC_VERIFIED, AML_CLEAR, ACCREDITED_INVESTOR, etc.)
+- validity window + revocation flag
 - hash of off-ledger documents
-- issuer and subject binding
+- issuer → subject binding
 
-Applications no longer store KYC data or documents. They only check claim types and time-valid attestations through a private on-ledger interface.
+Applications only check claims + validity. No documents are stored.
 
-3. Core Motivation
-Today every Canton application runs its own isolated KYC workflow:
-- separate onboarding
-- duplicated verification logic
-- multiple integrations with external KYC providers
-- separate data storage and revocation handling
+---
 
-This creates inconsistent compliance, duplicated infrastructure, operational overhead and a poor user experience.
+## Why This Is Only Possible on Canton
 
-More importantly, it increases systemic risk:
-- multiple KYC stores increase the chance of data breaches
-- off-ledger document copies create uncontrolled retention
-- uncoordinated revocation means outdated KYC may remain valid in some apps
-- each app tends to request more data than strictly necessary
+Public blockchains cannot support private KYC flows because all contract state is globally visible.  
+Any attestation or identity stored on a public chain immediately becomes public information.
 
-CantonID Vault removes these risks by centralizing sensitive compliance logic in one privacy-preserving on-ledger layer. Users complete KYC once, and any regulated Canton application can reuse the resulting attestations.
+Traditional permissioned blockchains also fall short: every application runs in isolation, so KYC must be re-implemented per app.  
+There is no shared trust layer, no selective visibility, and no safe way to reuse attestations between applications.
 
-Why This Has Not Existed Before  
-Public blockchains cannot support private KYC because all state is visible.  
-Traditional permissioned chains typically implemented KYC per application, not ecosystem-wide.  
+Canton is the first platform that provides all core ingredients required for a reusable compliance layer:
 
-Canton is the first environment that combines:
-- fine-grained contract-level privacy
-- selective disclosure via observers
-- trusted party identities
-- safe cross-application interoperability
+- contract-level privacy (identity and attestations are visible only to authorized parties)
+- selective disclosure via observers (apps see only the minimum data they are entitled to)
+- strong participant identities (issuers can be trusted as regulated entities)
+- secure cross-application interoperability (attestations can be consumed across apps safely)
 
-This makes a reusable KYC and AML foundation possible for the first time.
+This combination enables something that neither public chains nor traditional permissioned chains can deliver:  
+a **shared, private, reusable KYC/AML foundation** for an entire ecosystem of regulated financial applications.
 
-4. Privacy Model
-Identity and Attestation contracts use strict observer-based visibility:
-- issuers see their issued attestations
-- subjects see their own identities and attestations
-- applications see only those identities or attestations they are explicitly added to as observers
+---
 
-There is no global broadcast and no leakage of who has which compliance attributes. Applications receive only the minimum data necessary to verify eligibility.
+## User Flow
 
-5. Architecture
+1. User creates Identity  
+2. Regulated issuer adds Attestation  
+3. App is added as observer  
+4. App verifies:
+   - required claim types  
+   - active and non-revoked  
+   - valid timestamps  
 
-Identity.daml  
-Fields:
-- owner : Party
-- identityId : Text
-- name : Text
-- status : Status
-- extraObservers : [Party]
+User accesses RWA, lending, custody and OTC without repeating KYC.
 
-Choices:
-- AddObserver
-- Deactivate
-- Reactivate
+---
 
-Attestation.daml  
-Fields:
-- issuer : Party
-- subject : Party
-- identityCid : ContractId Identity.Identity
-- claimType : ClaimType
-- dataHash : Text
-- validFrom, validUntil : Time
-- revoked : Bool
+## Use Cases
 
-Choices:
-- Revoke
-- ExtendValidity
+- RWA onboarding  
+- Institutional lending  
+- OTC settlement  
+- Custody & brokerage  
+- Corporate onboarding  
+- Permissioned DEX/derivatives  
 
-Helper:
-- isActive : Attestation -> Time -> Bool
+---
 
-6. How It Works (User Flow)
-1. A user creates an Identity contract.
-2. A regulated entity (bank, broker or KYC provider) issues an Attestation linked to this identity.
-3. The attestation remains private to the issuer, subject and any approved observer applications.
-4. Applications validate:
-   - required claim types
-   - active and non-revoked status
-   - time validity
-5. If checks pass, the user can access RWA, lending, custody or OTC workflows without repeating KYC or exposing documents.
+## Files
 
-Example  
-A bank issues KYC_VERIFIED.  
-A broker adds AML_CLEAR.  
-A custodian requires ACCREDITED_INVESTOR.  
+daml/Identity.daml  
+daml/Attestation.daml  
+mockups/  
+prototype/  
+README.md  
 
-All apps simply check attestations. None store documents. None rerun KYC. No compliance data leaks across parties.
+---
 
-7. Use Cases
-- Tokenized real-world assets
-- Institutional lending platforms
-- OTC settlement workflows
-- Permissioned DEX and derivatives
-- Custody and brokerage operations
-- Corporate onboarding
+## Prototype (Figma)
 
-CantonID Vault functions as a shared, privacy-preserving compliance layer across the entire Canton ecosystem.
+https://www.figma.com/proto/N2oaCqAgvBuXi0iknHOB5l/Untitled?node-id=1-2
 
-8. How to Review
-1. Walk through the Figma prototype.
-2. Review Identity and Attestation templates.
-3. Verify:
-   - non-transferable identity model
-   - issuer-controlled attestation logic
-   - validity and revocation mechanics
-   - privacy enforcement through observers
-4. Consider how applications integrate with the compliance layer.
+---
 
-9. Repository Structure
-- daml/Identity.daml
-- daml/Attestation.daml
-- mockups/
-- prototype/
-- README.md
+## Future Work
 
-10. Prototype
-Interactive Figma:  
-https://www.figma.com/proto/N2oaCqAgvBuXi0iknHOB5l/Untitled?node-id=1-2  
-Screens:
-- Create Identity
-- Issue Attestation
-- Identity Vault
-
-11. Future Work
-- Full Daml implementation and DevNet deployment
-- JSON API endpoints
-- Web frontend (Next.js)
-- Standardized claim library
-- Event-driven revocation
-- Human-readable identity aliases
+- JSON API  
+- Next.js frontend  
+- standardized claim library  
+- event-driven revocation  
+- identity aliases
