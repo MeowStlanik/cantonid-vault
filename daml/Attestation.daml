@@ -12,23 +12,36 @@ data ClaimType
 
 template Attestation
   with
-    issuer      : Party                      -- bank / KYC / compliance provider
-    subject     : Party                      -- owner of the identity
+    issuer      : Party                        -- bank / KYC / compliance provider
+    subject     : Party                        -- owner of the identity
     identityCid : ContractId Identity.Identity -- link to the on-ledger Identity
-    claimType   : ClaimType                  -- standardized claim type
-    dataHash    : Text                       -- hash of off-ledger documents
+    claimType   : ClaimType                    -- standardized claim type
+    dataHash    : Text                         -- hash of off-ledger documents
     validFrom   : Time
     validUntil  : Time
     revoked     : Bool
+    extraObservers : [Party]                   -- applications allowed to see this attestation
   where
     signatory issuer
-    observer subject
+    observer issuer, subject, extraObservers
+
+    -- Share attestation with an additional application
+    choice AddObserver : ContractId Attestation
+      with
+        newObserver : Party
+      controller issuer
+      do
+        assertMsg "Observer already added" (notElem newObserver extraObservers)
+        archive self
+        create this with
+          extraObservers = newObserver :: extraObservers
 
     -- Mark attestation as revoked by the issuer
     choice Revoke : ContractId Attestation
       controller issuer
       do
         assertMsg "Already revoked" (not revoked)
+        archive self
         create this with revoked = True
 
     -- Extend validity period if issuer revalidates the subject
@@ -37,7 +50,9 @@ template Attestation
         newValidUntil : Time
       controller issuer
       do
-        assertMsg "New expiry must be in the future" (newValidUntil > validUntil)
+        now <- getTime
+        assertMsg "New expiry must be in the future" (newValidUntil > now && newValidUntil > validUntil)
+        archive self
         create this with validUntil = newValidUntil
 
 -- Helper function to check if an attestation is active at a given time
