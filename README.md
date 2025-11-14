@@ -56,7 +56,7 @@ This architecture fits naturally with Daml’s multi-party contracts and Canton�
 The current prototype focuses on UX and flow rather than a full backend implementation.
 
 🔗 **Figma Prototype:**  
-`<PUT YOUR FIGMA LINK HERE>`
+https://www.figma.com/proto/N2oaCqAgvBuXi0iknHOB5l/Untitled?node-id=1-2&p=f&t=WHMoLB9evIVxoQDK-1&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1
 
 The prototype shows three main screens:
 
