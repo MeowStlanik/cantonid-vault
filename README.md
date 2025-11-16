@@ -1,53 +1,69 @@
 # CantonID Vault – Privacy-Preserving Compliance Layer for Canton
 
-CantonID Vault provides one-time KYC and reusable, private attestations for Canton applications.  
-Apps never store documents or run KYC repeatedly – they only verify claim types through Canton’s privacy model.
+CantonID Vault provides **one-time KYC** and **reusable, private attestations** for Canton applications.  
+Apps never store documents or rerun verification – they only check claim types through Canton’s privacy model.
 
 ---
 
 ## Why
 
-Regulated workflows (RWA, lending, OTC, custody) require KYC, AML, accreditation, revocation and strict privacy.  
-Today each Canton application reimplements this separately, causing duplicated onboarding, inconsistent compliance and increased data risk.
+Regulated workflows (RWA, lending, OTC, custody) require:
+
+- KYC
+- AML
+- Accreditation
+- Revocation
+- Strict privacy
+
+Today, each Canton application reimplements these flows separately, causing:
+
+- Duplicated onboarding
+- Inconsistent compliance
+- Increased data risk
 
 ---
 
 ## What It Provides
 
-Identity Contract:
-- private, non-transferable on-ledger identity
-- stable identityId
-- active/suspended status
-- visibility controlled via observers
+### Identity Contract
 
-Attestation Contract:
-- issued by trusted entities (banks, brokers, KYC providers)
-- standardized claimType (KYC_VERIFIED, AML_CLEAR, ACCREDITED_INVESTOR, etc.)
-- validity window + revocation flag
-- hash of off-ledger documents
-- issuer → subject binding
+- Private, non-transferable on-ledger identity  
+- Stable `identityId`  
+- Active/suspended status  
+- Visibility controlled via observers  
 
-Applications only check claims + validity. No documents are stored.
+### Attestation Contract
+
+- Issued by trusted entities (banks, brokers, KYC providers)  
+- Standardized `claimType` (e.g., `KYC_VERIFIED`, `AML_CLEAR`, `ACCREDITED_INVESTOR`)  
+- Validity window + revocation flag  
+- Hash of off-ledger documents  
+- Issuer → subject binding  
+- Apps only check claims and validity – **no documents stored**
 
 ---
 
 ## Why This Is Only Possible on Canton
 
-Public blockchains cannot support private KYC flows because all contract state is globally visible.  
-Any attestation or identity stored on a public chain immediately becomes public information.
+Public chains:
+- All contract state is globally visible  
+- Any attestation becomes public immediately  
 
-Traditional permissioned blockchains also fall short: every application runs in isolation, so KYC must be re-implemented per app.  
-There is no shared trust layer, no selective visibility, and no safe way to reuse attestations between applications.
+Traditional permissioned chains:
+- Each app runs in isolation  
+- No shared trust & selective visibility  
+- No safe attestation reuse  
 
-Canton is the first platform that provides all core ingredients required for a reusable compliance layer:
+---
 
-- contract-level privacy (identity and attestations are visible only to authorized parties)
-- selective disclosure via observers (apps see only the minimum data they are entitled to)
-- strong participant identities (issuers can be trusted as regulated entities)
-- secure cross-application interoperability (attestations can be consumed across apps safely)
+Canton delivers:
 
-This combination enables something that neither public chains nor traditional permissioned chains can deliver:  
-a **shared, private, reusable KYC/AML foundation** for an entire ecosystem of regulated financial applications.
+- **Contract-level privacy**
+- **Selective disclosure via observers**
+- **Strong regulated identities**
+- **Secure cross-application interoperability**
+
+**Result:** A shared, private, reusable KYC/AML layer for regulated financial ecosystems.
 
 ---
 
@@ -57,11 +73,29 @@ a **shared, private, reusable KYC/AML foundation** for an entire ecosystem of re
 2. Regulated issuer adds Attestation  
 3. App is added as observer  
 4. App verifies:
-   - required claim types  
-   - active and non-revoked  
-   - valid timestamps  
+   - Required claim types  
+   - Non-revoked  
+   - Valid timestamps  
 
-User accesses RWA, lending, custody and OTC without repeating KYC.
+**User now accesses RWA, lending, custody, OTC without repeated KYC.**
+
+---
+
+## 📌 Example: Alice in Canton Ecosystem
+
+Alice completes KYC once with **RegulatedBank**.
+
+- Invests in tokenized real estate → approved instantly  
+- Borrows against her tokens → approved instantly  
+- Trades on OTC platform → approved instantly  
+
+> Zero re-onboarding. Zero document uploads. Full privacy.
+
+**Without CantonID Vault:**  
+3 apps = 3 separate KYC processes = 3 data silos  
+
+**With CantonID Vault:**  
+1 KYC = ecosystem-wide access
 
 ---
 
@@ -72,22 +106,22 @@ User accesses RWA, lending, custody and OTC without repeating KYC.
 - OTC settlement  
 - Custody & brokerage  
 - Corporate onboarding  
-- Permissioned DEX/derivatives  
+- Permissioned DEX / derivatives  
 
 ---
 
 ## Files
 
-daml/Identity.daml  
-daml/Attestation.daml  
-mockups/ 
-README.md  
+- `daml/Identity.daml`  
+- `daml/Attestation.daml`  
+- `mockups/`  
+- `README.md`
 
 ---
 
-## Prototype (Figma)
+## Prototype
 
-https://www.figma.com/proto/N2oaCqAgvBuXi0iknHOB5l/Untitled?node-id=1-2
+[Figma Prototype](https://www.figma.com/proto/N2oaCqAgvBuXi0iknHOB5l/Untitled?node-id=1-2)
 
 ---
 
@@ -95,6 +129,6 @@ https://www.figma.com/proto/N2oaCqAgvBuXi0iknHOB5l/Untitled?node-id=1-2
 
 - JSON API  
 - Next.js frontend  
-- standardized claim library  
-- event-driven revocation  
-- identity aliases
+- Standardized claim library  
+- Event-driven revocation  
+- Identity aliases  
