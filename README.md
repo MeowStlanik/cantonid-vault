@@ -8,6 +8,8 @@ No repeated KYC. No document uploads. Minimal cost. Full privacy.
 ## **Why It Matters**
 
 Canton is onboarding banks, brokers, RWA platforms, custodians, and institutional venues.  
+Major institutions such as Goldman Sachs, BNP Paribas, and Broadridge have already piloted Canton-based infrastructure,  
+making them natural future issuers and operators in the ecosystem.  
 Each of them must run KYC/AML — and today they all rebuild the flow independently.  
 This is slow, expensive, and destroys conversion.
 
