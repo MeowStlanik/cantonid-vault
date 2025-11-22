@@ -109,8 +109,7 @@ This cuts onboarding work by **~80%** and reduces costs by **5–10×**.
 
 ## **Prototype**
 
-Figma: *(link here)*
-
+Figma: https://www.figma.com/proto/N2oaCqAgvBuXi0iknHOB5l/Untitled?node-id=1-2&p=f&t=WHMoLB9evIVxoQDK-1&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1
 ---
 
 **One KYC. One identity. Full ecosystem access.**
