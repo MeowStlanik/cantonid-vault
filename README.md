@@ -7,24 +7,17 @@ No repeated KYC. No document uploads. Minimal cost. Full privacy.
 
 ## Why It Matters
 
-Canton is onboarding banks, brokers, RWA platforms, custodians, stablecoin issuers, and institutional venues.  
-All of them require KYC/AML — and today each application rebuilds these flows independently.
+Regulated Canton apps like **Temple**, **FCX**, **D2X**, and **Black Manta** already run parallel KYC processes, all duplicating the same work.  
+These are real regulated venues, and repeated onboarding is one of their highest friction points.
 
-### Before
-- every app integrates its own KYC provider  
-- $2.5–20 per user for basic checks  
-- $50+ for corporate onboarding  
-- repeated onboarding → 20–40% user drop-off  
-- documents handled and stored multiple times  
-- fragmented identity silos
-
-### After (with CantonID Vault)
-- user verifies **once**  
-- apps pay almost nothing for verified users  
-- no documents handled by downstream apps  
-- instant onboarding across the ecosystem  
-- privacy preserved by design  
-- standardized claims + revocation logic
+         BEFORE                     →              AFTER
+---------------------------------------------------------------------
+  4 KYC per user                     →    1 verification for all apps
+  $20–50 onboarding cost             →    ~$0 for verified users
+  30% drop-off per app               →    <5% drop-off
+  docs stored in 4 places            →    docs stored once (issuer)
+  4 AML checks                       →    0 downstream AML checks
+  
 
 CantonID Vault turns fragmented compliance into a shared, privacy-preserving layer.
 
