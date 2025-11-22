@@ -1,98 +1,102 @@
-# CantonID Vault — One KYC for the Entire Canton Ecosystem
+# **CantonID Vault — One KYC for the Entire Canton Ecosystem**
 
 Users verify **once**. Every Canton-connected application consumes **private, reusable attestations**.  
 No repeated KYC. No document uploads. Minimal cost. Full privacy.
 
 ---
 
-## Why It Matters
+## **Why It Matters**
 
-Canton is onboarding banks, brokers, RWA platforms, custodians, stablecoin issuers, and institutional venues.  
-All of them require KYC/AML — and today each application rebuilds these flows independently.
-
-### Before → After (Impact at a Glance)
-
-| **Before**                    | **→**| **After (Vault)**                 |
-|-------------------------------|------|-----------------------------------|
-| 4 KYC processes per user      |      | 1 verification for all apps       |
-| $20–50 onboarding cost        |      | ~$0 for verified users            |
-| 30% drop-off per app          |      | <5% drop-off                      |
-| Documents stored in 4 places  |      | Stored once (issuer)              |
-| 4 AML checks                  |      | 0 downstream AML checks           |
-
-CantonID Vault turns fragmented compliance into a shared, privacy-preserving layer.
+Canton is onboarding banks, brokers, RWA platforms, custodians, and institutional venues.  
+Each of them must run KYC/AML — and today they all rebuild the flow independently.  
+This is slow, expensive, and destroys conversion.
 
 ---
 
-## What CantonID Vault Provides
+## **Before → After**
 
-### Identity Contract
+| **Before**                    | **→** | **After (Vault)**                 |
+|-------------------------------|-------|------------------------------------|
+| 4 KYC processes per user      | →     | 1 verification for all apps        |
+| $20–50 onboarding cost        | →     | ~$0 for verified users             |
+| 30% drop-off per app          | →     | <5% drop-off                       |
+| Documents stored in 4 places  | →     | Stored once (issuer)               |
+| 4 AML checks                  | →     | 0 downstream AML checks            |
+
+Vault transforms fragmented onboarding into a shared, private compliance layer.
+
+---
+
+## **Regulated Issuer Model**
+
+Reusable KYC only works if trust is formalized.  
+Vault introduces:
+
+- **Vault Issuers** — licensed KYC/AML providers  
+- **Reliance agreements** — apps legally rely on issuer verification  
+- **Issuer liability** — issuer owns KYC/AML responsibility  
+- **Shared attestations** — apps reuse verified claims, not documents  
+
+This solves the regulatory blocker and makes cross-app KYC legally valid.
+
+---
+
+## **What CantonID Vault Provides**
+
+### **Identity Contract**
 - private, non-transferable identity  
 - stable `identityId`  
 - active/suspended status  
-- selective visibility via observers  
-
-### Attestation Contract
-- issued by regulated entities (banks, brokers, licensed KYC providers)  
-- standardized `claimType` (e.g., `KYC_VERIFIED`, `AML_CLEAR`, `ACCREDITED_INVESTOR`)  
-- validity window + explicit revocation  
-- hashes of off-ledger documents only  
-- applications verify claims, never documents  
-
----
-
-## Why This Works Only on Canton
-
-Public chains → everything is exposed.  
-Typical permissioned chains → everything is siloed.
-
-Canton enables:
-- contract-level privacy  
 - selective disclosure via observers  
-- a trusted regulated-issuer model  
-- private cross-application interoperability  
 
-This makes a **shared, reusable, private compliance layer** possible.
+### **Attestation Contract**
+- issued by licensed Vault Issuers  
+- standardized `claimType` (`KYC_VERIFIED`, `AML_CLEAR`, `ACCREDITED_INVESTOR`)  
+- validity window + revocation  
+- hashes of off-ledger documents only  
+- apps verify claims, never documents  
+
+### **Dynamic AML**
+Issuer performs continuous screening (sanctions, PEP, adverse media).  
+Apps always see up-to-date AML status without running AML themselves.
 
 ---
 
-## User Flow
+## **Why This Works Only on Canton**
+
+Canton provides:  
+- contract-level privacy  
+- selective disclosure  
+- private cross-application interoperability  
+- trusted regulated-issuer model  
+
+This enables a **shared, reusable, private compliance layer** — something public chains cannot do.
+
+---
+
+## **User Flow**
 
 1. User creates an on-ledger Identity  
-2. A regulated issuer attaches an Attestation  
-3. An application is added as an observer  
-4. The application checks claim types, validity window, and revocation status  
+2. Vault Issuer performs KYC/AML and issues attestations  
+3. App is added as an observer  
+4. App checks claim types, validity window, and revocation status  
 
-**Result:** One verification → access to the entire ecosystem.
-
----
-
-## Example
-
-Alice completes KYC with a regulated issuer.  
-She can instantly use:
-
-- tokenized real estate  
-- lending/borrowing platforms  
-- OTC venues  
-- custody & brokerage  
-
-All auto-approved. Zero repeated onboarding.
+**Result:** One verification → instant access across the ecosystem.
 
 ---
 
-## Why Builders Benefit
+## **Why Builders Benefit**
 
-Teams no longer integrate KYC providers, manage documents, or maintain AML logic.  
-They simply check:
+Teams no longer integrate KYC vendors or manage documents.  
+They only check:
 
 > “Does this user have the required valid attestations?”
 
-This cuts onboarding work by **~80%** and reduces operating cost by **5–10×**.
+This cuts onboarding work by **~80%** and reduces costs by **5–10×**.
 
 ---
 
-## Use Cases
+## **Use Cases**
 
 - RWA onboarding  
 - institutional lending  
@@ -103,28 +107,9 @@ This cuts onboarding work by **~80%** and reduces operating cost by **5–10×**
 
 ---
 
-## Files
+## **Prototype**
 
-- `daml/Identity.daml`  
-- `daml/Attestation.daml`  
-- `mockups/`  
-- `README.md`
-
----
-
-## Prototype
-
-Figma: https://www.figma.com/proto/N2oaCqAgvBuXi0iknHOB5l/Untitled?node-id=1-2
-
----
-
-## Future Work
-
-- JSON API  
-- Next.js frontend  
-- claim-type registry  
-- event-based revocation  
-- identity aliases
+Figma: *(link here)*
 
 ---
 
