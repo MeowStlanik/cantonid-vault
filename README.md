@@ -19,7 +19,7 @@ This is slow, expensive, and destroys conversion.
 |-------------------------------|-------|------------------------------------|
 | 4 KYC processes per user      | →     | 1 verification for all apps        |
 | $20–50 onboarding cost        | →     | ~$0 for verified users             |
-| 30% drop-off per app          | →     | <5% drop-off                       |
+| 25–40% drop-off per app       | →     | expected <5% drop-off              |
 | Documents stored in 4 places  | →     | Stored once (issuer)               |
 | 4 AML checks                  | →     | 0 downstream AML checks            |
 
@@ -29,36 +29,25 @@ Vault transforms fragmented onboarding into a shared, private compliance layer.
 
 ## **Regulated Issuer Model**
 
-Reusable KYC only works if trust is formalized.  
-Vault introduces:
+Reusable KYC only works if trust is anchored in regulated entities.  
+Vault introduces a simple model:
 
 - **Vault Issuers** — licensed KYC/AML providers  
-- **Reliance agreements** — apps legally rely on issuer verification  
-- **Issuer liability** — issuer owns KYC/AML responsibility  
-- **Shared attestations** — apps reuse verified claims, not documents  
+- **Reliance framework** — apps rely on issuer verification instead of running their own  
+- **Issuer responsibility** — issuer maintains KYC/AML standards and monitoring  
+- **Shared attestations** — apps reuse verified claims, never documents  
 
-This solves the regulatory blocker and makes cross-app KYC legally valid.
+This removes duplicated checks and makes cross-app KYC both private and compliant.
 
 ---
 
-## **What CantonID Vault Provides**
+## **What Vault Provides**
 
-### **Identity Contract**
-- private, non-transferable identity  
-- stable `identityId`  
-- active/suspended status  
-- selective disclosure via observers  
-
-### **Attestation Contract**
-- issued by licensed Vault Issuers  
-- standardized `claimType` (`KYC_VERIFIED`, `AML_CLEAR`, `ACCREDITED_INVESTOR`)  
+- private, non-transferable on-ledger identity (`identityId`)  
+- standardized attestations from licensed issuers (`KYC_VERIFIED`, `AML_CLEAR`, `ACCREDITED_INVESTOR`)  
 - validity window + revocation  
-- hashes of off-ledger documents only  
-- apps verify claims, never documents  
-
-### **Dynamic AML**
-Issuer performs continuous screening (sanctions, PEP, adverse media).  
-Apps always see up-to-date AML status without running AML themselves.
+- apps verify claims (never documents)  
+- continuous AML monitoring by the issuer, automatically reflected in attestations  
 
 ---
 
@@ -68,7 +57,8 @@ Canton provides:
 - contract-level privacy  
 - selective disclosure  
 - private cross-application interoperability  
-- trusted regulated-issuer model  
+- trusted regulated-issuer model
+- synchronized state for consistent issuance and revocation
 
 This enables a **shared, reusable, private compliance layer** — something public chains cannot do.
 
@@ -98,12 +88,14 @@ This cuts onboarding work by **~80%** and reduces costs by **5–10×**.
 
 ## **Use Cases**
 
-- RWA onboarding  
-- institutional lending  
-- digital securities issuance  
-- custody & brokerage  
-- corporate onboarding  
-- permissioned DEX / derivatives  
+- RWA onboarding (Black Manta, Zeconomy)
+- institutional lending (Crypto Finance AG, Taurus)
+- digital securities issuance (Texture Capital, D2X)
+- custody & brokerage (Zodia Custody, BitGo)
+- corporate onboarding (Republic, Meria)
+- permissioned DEX / derivatives (Temple Digital Group, Hydra X)
+
+These institutions already operate under strict KYC/AML requirements today.
 
 ---
 
