@@ -1,6 +1,8 @@
 module Attestation where
 
 import Identity
+import DA.Assert (assertMsg)
+import DA.Time (getTime)
 
 -- Standardized claim types used across CantonID Vault
 data ClaimType
