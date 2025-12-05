@@ -1,10 +1,9 @@
 module Attestation where
 
 import Identity
-import DA.Assert (assertMsg)
-import DA.Time (getTime)
+import DA.Time (Time)
 
--- Standardized claim types used across CantonID Vault
+-- Standard claim types for CantonID Vault
 data ClaimType
   = KYC_VERIFIED
   | AML_CLEAR
@@ -14,50 +13,46 @@ data ClaimType
 
 template Attestation
   with
-    issuer      : Party                        -- bank / KYC / compliance provider
-    subject     : Party                        -- owner of the identity
-    identityCid : ContractId Identity.Identity -- link to the on-ledger Identity
-    claimType   : ClaimType                    -- standardized claim type
-    dataHash    : Text                         -- hash of off-ledger documents
-    validFrom   : Time
-    validUntil  : Time
-    revoked     : Bool
-    extraObservers : [Party]                   -- applications allowed to see this attestation
+    issuer         : Party                        -- issuer (bank/compliance)
+    subject        : Party                        -- identity owner
+    identityCid    : ContractId Identity.Identity -- linked identity contract
+    claimType      : ClaimType
+    dataHash       : Text                         -- hash of off-ledger data
+    validFrom      : Time
+    validUntil     : Time
+    revoked        : Bool
+    extraObservers : [Party]
   where
     signatory issuer
-    observer issuer, subject, extraObservers
+    observer subject, extraObservers
 
-    -- Share attestation with an additional application
-    choice AddObserver : ContractId Attestation
-      with
-        newObserver : Party
-      controller issuer
-      do
-        assertMsg "Observer already added" (notElem newObserver extraObservers)
-        archive self
-        create this with
-          extraObservers = newObserver :: extraObservers
+    ensure validFrom < validUntil
 
-    -- Mark attestation as revoked by the issuer
+    ---------------------------------------------------------------------------
+    -- Lifecycle choices
+    ---------------------------------------------------------------------------
+
+    -- Revoke the attestation
     choice Revoke : ContractId Attestation
       controller issuer
       do
-        assertMsg "Already revoked" (not revoked)
+        assertMsg "Attestation already revoked" (not revoked)
         archive self
         create this with revoked = True
 
-    -- Extend validity period if issuer revalidates the subject
+    -- Extend the validity period
     choice ExtendValidity : ContractId Attestation
       with
         newValidUntil : Time
       controller issuer
       do
         now <- getTime
-        assertMsg "New expiry must be in the future" (newValidUntil > now && newValidUntil > validUntil)
+        assertMsg "New expiry must be in the future"
+          (newValidUntil > now && newValidUntil > validUntil)
         archive self
         create this with validUntil = newValidUntil
 
--- Helper function to check if an attestation is active at a given time
+-- Helper function for checking if an attestation is active
 isActive : Attestation -> Time -> Bool
 isActive att now =
   (not att.revoked)

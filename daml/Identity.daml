@@ -1,45 +1,69 @@
 module Identity where
 
-import DA.Assert (assertMsg)
+import DA.List (delete, dedup)
 
 -- Basic lifecycle status for an on-ledger identity
 data Status = Active | Suspended
   deriving (Eq, Show)
 
+-- Stable identity key (per owner)
+type IdentityKey = (Party, Text)
+
 template Identity
   with
     owner          : Party
-    identityId     : Text    -- stable id that other contracts can reference
-    name           : Text    -- human readable name
+    identityId     : Text    -- unique identity string
+    name           : Text    -- human-readable name
     status         : Status  -- Active or Suspended
-    extraObservers : [Party] -- applications that are allowed to see this identity
+    extraObservers : [Party] -- parties allowed to see this identity
   where
     signatory owner
-    observer owner, extraObservers
+    observer extraObservers
 
-    -- Add an additional observer application that can see this identity
-    choice AddObserver : ContractId Identity
+    -- Uniqueness per (owner, identityId)
+    key (owner, identityId) : IdentityKey
+    maintainer fst
+
+    ---------------------------------------------------------------------------
+    -- Observer management (selective disclosure)
+    ---------------------------------------------------------------------------
+
+    -- Add one or more observers
+    choice AddExtraObservers : ContractId Identity
       with
-        newObserver : Party
+        newObservers : [Party]
       controller owner
       do
-        assertMsg "Observer already added" (notElem newObserver extraObservers)
+        let updatedObservers = dedup (extraObservers ++ newObservers)
         archive self
-        create this with
-          extraObservers = newObserver :: extraObservers
+        create this with extraObservers = updatedObservers
 
-    -- Suspend identity (for example, blocked or under review)
+    -- Remove an observer
+    choice RemoveExtraObserver : ContractId Identity
+      with
+        observerToRemove : Party
+      controller owner
+      do
+        let updatedObservers = delete observerToRemove extraObservers
+        archive self
+        create this with extraObservers = updatedObservers
+
+    ---------------------------------------------------------------------------
+    -- Lifecycle management
+    ---------------------------------------------------------------------------
+
+    -- Suspend identity
     choice Deactivate : ContractId Identity
       controller owner
       do
-        assertMsg "Already suspended" (status == Active)
+        assertMsg "Identity already suspended" (status == Active)
         archive self
         create this with status = Suspended
 
-    -- Reactivate identity after checks are cleared
+    -- Reactivate identity
     choice Reactivate : ContractId Identity
       controller owner
       do
-        assertMsg "Already active" (status == Suspended)
+        assertMsg "Identity already active" (status == Suspended)
         archive self
         create this with status = Active
