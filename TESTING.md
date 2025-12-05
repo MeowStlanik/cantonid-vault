@@ -16,7 +16,7 @@ Before running the prototype, ensure the following are installed:
 Clone the repository:
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/MeowStlanik/cantonid-vault
 cd cantonid-vault
 ```
 
