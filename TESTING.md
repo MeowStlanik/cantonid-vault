@@ -1,65 +1,80 @@
 # Testing Instructions – CantonID Vault
 
-This guide shows how to run the prototype locally, create identities, and issue attestations.
+This guide describes how to run the CantonID Vault prototype locally, create identities, issue attestations, and test access control with selective disclosure.
 
 ---
 
 ## 1. Requirements
 
-- Daml SDK 2.x installed  
-- Canton Community environment or `daml start`  
-- Git installed  
+Before running the prototype, ensure the following are installed:
 
----
+- **Daml SDK 2.x**
+- **Canton Community** or the built‑in Sandbox (`daml start`)
+- **Git**
+- Optional: **Daml Navigator** for UI-based testing
 
-## 2. Run the Ledger
-
-### Option A: Run with Daml Sandbox
+Clone the repository:
 
 ```bash
-daml start
+git clone <your-repo-url>
+cd cantonid-vault
 ```
-
-This launches:
-- Sandbox ledger  
-- HTTP JSON API on port 7575  
-- Navigator interface  
 
 ---
 
-## 3. Compile the Daml contracts
+## 2. Build the Daml Contracts
+
+Compile all templates:
 
 ```bash
 daml build
 ```
 
+This generates the `.dar` archive in `.daml/dist/`.
+
 ---
 
-## 4. Deploy to Sandbox
+## 3. Start the Ledger (Sandbox)
+
+Run a local Sandbox ledger with JSON API and Navigator:
 
 ```bash
 daml start
 ```
 
-Templates available:
-- `Identity.Identity`  
-- `Attestation.Attestation`  
-- `AccessControl.AccessGrant`  
+This starts:
+
+- Sandbox ledger  
+- JSON API at **http://localhost:7575**  
+- Navigator UI  
+
+---
+
+## 4. Available Templates
+
+The following templates become available once the ledger is running:
+
+- `Identity.Identity`
+- `Attestation.Attestation`
+- `AccessControl.AccessRequest`
+- `AccessControl.AccessGrant` (choice)
+
+These represent the full identity → attestation → access workflow.
 
 ---
 
 ## 5. Create a Test Identity
 
-### Using Navigator
+### Option A – Using Navigator
 
 1. Open Navigator  
 2. Select party **Alice**  
-3. Create contract **Identity**  
-4. Fields:  
-   - name: "Alice Example"  
-   - identityId: "alice-001"  
+3. Create a contract of type **Identity**  
+4. Fields:
+   - `name`: `"Alice Example"`
+   - `identityId`: `"alice-001"`
 
-### Using JSON API
+### Option B – Using JSON API
 
 ```json
 POST http://localhost:7575/v1/create
@@ -110,10 +125,7 @@ POST http://localhost:7575/v1/create
 }
 ```
 
-Alice approves:
-
-- Open the AccessRequest  
-- Exercise **GrantAccess**  
+Alice approves in Navigator by exercising **GrantAccess**.
 
 ---
 
@@ -126,15 +138,17 @@ POST http://localhost:7575/v1/query
 }
 ```
 
-App1 only sees attestations it is authorized to view.
+App1 will only see attestations it has access to.
 
 ---
 
 ## 9. Expected Outcome
 
 - Identity created  
-- Attestations issued  
-- Third party requests access  
-- Owner grants access  
-- App verifies compliance  
-- Private user data stays fully confidential  
+- KYC attestation issued  
+- App requests access  
+- User grants access  
+- App reads only permitted attestations  
+- All personal data remains private  
+
+---
