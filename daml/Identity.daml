@@ -1,5 +1,7 @@
 module Identity where
 
+import DA.Assert (assertMsg)
+
 -- Basic lifecycle status for an on-ledger identity
 data Status = Active | Suspended
   deriving (Eq, Show)
