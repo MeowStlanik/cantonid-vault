@@ -29,14 +29,16 @@ No repeated KYC. No document uploads. Minimal cost. Full privacy.
 
 Below are the key screens of the demo (images stored in `mockups/`):
 
-### Identity Attestation Vault
-![Identity Vault](mockups/attestation-vault.png)
 
 ### Create Identity
 ![Create Identity](mockups/create-identity.png)
 
 ### Issue Attestation
 ![Issue Attestation](mockups/issue-attestation.png)
+
+### Identity Attestation Vault
+![Identity Vault](mockups/attestation-vault.png)
+
 
 ---
 
