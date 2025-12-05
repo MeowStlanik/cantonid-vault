@@ -87,6 +87,45 @@ Vault introduces a simple model:
 
 ---
 
+## Regulatory Alignment
+
+### Trusted Issuer Model
+- Attestations issued only by **regulated institutions**  
+  (banks, VASPs, licensed KYC/AML providers)
+- Issuers operate under existing compliance frameworks  
+  (FATF, FinCEN, FCA, MAS)
+- Each issuer registers an on-ledger identity with verifiable credentials
+- Apps rely on these attestations similarly to established off-ledger KYC vendors
+
+### Attestation Standards
+- **Shared claim formats** across the ecosystem:
+  - `KYC_VERIFIED`: ID verification + sanctions screening  
+  - `ACCREDITED_INVESTOR`: Income/asset validation per jurisdiction  
+  - `AML_CLEAR`: Ongoing monitoring + risk scoring
+- Issuers implement standards according to local regulations
+- Apps may require minimum issuer attributes (jurisdiction, license type)
+
+### Liability & Assurance
+- **Liability for KYC/AML accuracy remains with the issuer**  
+  following standard delegation models
+- Apps assume issuer-level risk similar to certificate trust chains
+- Built-in safeguards:
+  - Expiration-based revalidation  
+  - Multi-issuer redundancy  
+  - Immediate issuer-triggered revocation  
+  - User migration to a new issuer without re-onboarding
+
+### Cryptographic Integrity
+- Attestations cryptographically signed with issuer keys registered on-ledger
+- Canton consensus prevents forgery and ensures state integrity
+- Apps maintain their own allow-lists of trusted issuers
+- Full private audit trail stored on-ledger
+
+### Jurisdictional Compliance
+- Attestations include jurisdiction metadata (`EU`, `US`, `SG`, `UK`, etc.)
+- Apps validate regulatory eligibility based on their own requirements
+- Compliance preserved without exposing user documents thanks to Canton privacy
+
 # What Vault Provides
 
 - private, non-transferable on-ledger identity (`identityId`)  
