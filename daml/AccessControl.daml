@@ -1,29 +1,26 @@
 module AccessControl where
 
-import DA.Next.Set as Set
-import DA.Optional
-
 template AccessRequest
   with
-    requester : Party
+    requester     : Party
     identityOwner : Party
-    identityId : Text
+    identityId    : Text
   where
     signatory requester, identityOwner
 
-    controller identityOwner can
-      GrantAccess : ContractId AccessGrant
-        do
-          create AccessGrant with
-            requester
-            identityOwner
-            identityId
+    choice GrantAccess : ContractId AccessGrant
+      controller identityOwner
+      do
+        create AccessGrant with
+          requester
+          identityOwner
+          identityId
 
 template AccessGrant
   with
-    requester : Party
+    requester     : Party
     identityOwner : Party
-    identityId : Text
+    identityId    : Text
   where
     signatory identityOwner
     observer requester
