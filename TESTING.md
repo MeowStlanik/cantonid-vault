@@ -57,7 +57,7 @@ The following templates become available once the ledger is running:
 - `Identity.Identity`
 - `Attestation.Attestation`
 - `AccessControl.AccessRequest`
-- `AccessControl.AccessGrant` (choice)
+- `AccessControl.AccessGrant`
 
 These represent the full identity → attestation → access workflow.
 
@@ -71,19 +71,23 @@ These represent the full identity → attestation → access workflow.
 2. Select party **Alice**  
 3. Create a contract of type **Identity**  
 4. Fields:
-   - `name`: `"Alice Example"`
-   - `identityId`: `"alice-001"`
+   - `name`: "Alice Example"
+   - `identityId`: "alice-001"
+   - `status`: "Active"
+   - `extraObservers`: []
 
 ### Option B – Using JSON API
 
 ```json
-POST http://localhost:7575/v1/create
+POST http://localhost:7575/v1/create?party=Alice
 {
   "templateId": "Identity:Identity",
   "payload": {
     "owner": "Alice",
+    "identityId": "alice-001",
     "name": "Alice Example",
-    "identityId": "alice-001"
+    "status": "Active",
+    "extraObservers": []
   }
 }
 ```
@@ -95,16 +99,19 @@ POST http://localhost:7575/v1/create
 Issuer: **BankNode**
 
 ```json
-POST http://localhost:7575/v1/create
+POST http://localhost:7575/v1/create?party=BankNode
 {
   "templateId": "Attestation:Attestation",
   "payload": {
     "issuer": "BankNode",
     "subject": "Alice",
-    "identityId": "alice-001",
+    "identityCid": "<CONTRACT_ID_IDENTITY>",
     "claimType": "KYC_VERIFIED",
-    "validUntil": "2026-12-31",
-    "active": true
+    "dataHash": "sha256:placeholder",
+    "validFrom": "2025-01-01T00:00:00Z",
+    "validUntil": "2026-12-31T00:00:00Z",
+    "revoked": false,
+    "extraObservers": []
   }
 }
 ```
@@ -114,7 +121,7 @@ POST http://localhost:7575/v1/create
 ## 7. Application Requests Access
 
 ```json
-POST http://localhost:7575/v1/create
+POST http://localhost:7575/v1/create?party=App1
 {
   "templateId": "AccessControl:AccessRequest",
   "payload": {
@@ -132,13 +139,14 @@ Alice approves in Navigator by exercising **GrantAccess**.
 ## 8. Verify Attestations as App1
 
 ```json
-POST http://localhost:7575/v1/query
+POST http://localhost:7575/v1/query?party=App1
 {
   "templateIds": ["Attestation:Attestation"]
 }
 ```
 
-App1 will only see attestations it has access to.
+App1 can request access (recorded as AccessGrant), 
+but in this prototype attestations are still only visible to issuer and subject.
 
 ---
 
@@ -148,7 +156,7 @@ App1 will only see attestations it has access to.
 - KYC attestation issued  
 - App requests access  
 - User grants access  
-- App reads only permitted attestations  
+- Access grants are recorded on-ledger (AccessGrant), but this prototype does not yet wire them to attestation visibility.
 - All personal data remains private  
 
 ---
