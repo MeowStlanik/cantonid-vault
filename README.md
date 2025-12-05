@@ -47,7 +47,6 @@ Below are the key screens of the demo (images stored in `mockups/`):
 - `daml/` — core smart contracts  
 - `mockups/` — UI prototype screens  
 - `README.md` — full project description  
-- `TESTING.md` — instructions for running and testing the prototype  
 
 ---
 
