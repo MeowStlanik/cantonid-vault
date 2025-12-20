@@ -1,50 +1,50 @@
-module Identity where
+module Attestation where
 
-import DA.List (delete, dedup)
+import Identity
+import DA.Time (Time)
 
-data Status = Active | Suspended
+data ClaimType
+  = KYC_VERIFIED
+  | AML_CLEAR
+  | ACCREDITED_INVESTOR
+  | RWA_ELIGIBLE
   deriving (Eq, Show)
 
-type IdentityKey = (Party, Text)
-
-template Identity
+template Attestation
   with
-    owner : Party
-    identityId : Text
-    name : Text
-    status : Status
+    issuer         : Party
+    subject        : Party
+    identityId     : Text -- Changed from Cid to ID (stable reference)
+    claimType      : ClaimType
+    dataHash       : Text
+    validFrom      : Time
+    validUntil     : Time
+    revoked        : Bool
     extraObservers : [Party]
   where
-    signatory owner
-    observer extraObservers
+    signatory issuer
+    observer subject, extraObservers
 
-    key (owner, identityId) : IdentityKey
-    maintainer key._1
+    ensure validFrom < validUntil
 
-    choice AddExtraObservers : ContractId Identity
+    choice Revoke : ContractId Attestation
+      controller issuer
+      do
+        assertMsg "Attestation already revoked" (not revoked)
+        create this with revoked = True
+
+    choice ExtendValidity : ContractId Attestation
       with
-        newObservers : [Party]
-      controller owner
+        newValidUntil : Time
+      controller issuer
       do
-        let updatedObservers = dedup $ filter (/= owner) (extraObservers ++ newObservers)
-        create this with extraObservers = updatedObservers
+        now <- getTime
+        assertMsg "New expiry must be in the future"
+          (newValidUntil > now && newValidUntil > validUntil)
+        create this with validUntil = newValidUntil
 
-    choice RemoveExtraObserver : ContractId Identity
-      with
-        observerToRemove : Party
-      controller owner
-      do
-        let updatedObservers = delete observerToRemove extraObservers
-        create this with extraObservers = updatedObservers
-
-    choice Deactivate : ContractId Identity
-      controller owner
-      do
-        assertMsg "Identity is not Active" (status == Active)
-        create this with status = Suspended
-
-    choice Reactivate : ContractId Identity
-      controller owner
-      do
-        assertMsg "Identity is not Suspended" (status == Suspended)
-        create this with status = Active
+isActive : Attestation -> Time -> Bool
+isActive att now =
+  (not att.revoked)
+    && att.validFrom <= now
+    && now <= att.validUntil
