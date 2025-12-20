@@ -1,68 +1,45 @@
 module AccessControl where
 
 import Identity
-import DA.List (delete)
 
--- An application requests access to a user's identity
 template AccessRequest
   with
-    requester     : Party
+    requester : Party
     identityOwner : Party
-    identityId    : Text
+    identityId : Text
   where
-    signatory requester, identityOwner
+    signatory requester
+    observer identityOwner
 
-    -- The identity owner decides whether to approve access
     choice GrantAccess : ContractId AccessGrant
       controller identityOwner
       do
-        -- 1) Verify the identity exists
-        mbIdentityCid <- lookupByKey @Identity.Identity (identityOwner, identityId)
-        identityCid <- case mbIdentityCid of
-          None     -> abort "Identity not found for AccessRequest"
-          Some cid -> pure cid
-
-        identity <- fetch identityCid
-
-        -- 2) Check identity is active
+        (idCid, identity) <- fetchByKey @Identity (identityOwner, identityId)
         assertMsg "Identity is not active" (identity.status == Active)
 
-        -- 3) Add requester to observers (if not already included)
-        let newExtraObservers =
-              if elem requester identity.extraObservers
-              then identity.extraObservers
-              else requester :: identity.extraObservers
+        exercise idCid AddExtraObservers with newObservers = [requester]
 
-        archive identityCid
-        _ <- create identity with extraObservers = newExtraObservers
-
-        -- 4) Create access grant record
         create AccessGrant with
           requester
           identityOwner
           identityId
 
--- Record of granted access (revokable)
 template AccessGrant
   with
-    requester     : Party
+    requester : Party
     identityOwner : Party
-    identityId    : Text
+    identityId : Text
   where
     signatory identityOwner
     observer requester
 
-    -- Identity owner can revoke access
     choice RevokeAccess : ()
       controller identityOwner
       do
-        mbIdentityCid <- lookupByKey @Identity.Identity (identityOwner, identityId)
+        mbIdentityCid <- lookupByKey @Identity (identityOwner, identityId)
         case mbIdentityCid of
           None -> pure ()
           Some identityCid -> do
-            identity <- fetch identityCid
-            let updatedObservers = delete requester identity.extraObservers
-            archive identityCid
-            _ <- create identity with extraObservers = updatedObservers
-            pure ()
-        archive self
+             exercise identityCid RemoveExtraObserver with observerToRemove = requester
+             pure ()
+        pure ()
