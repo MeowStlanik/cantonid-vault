@@ -1,60 +1,50 @@
-module Attestation where
+module Identity where
 
-import Identity
-import DA.Time (Time)
+import DA.List (delete, dedup)
 
--- Standard claim types for CantonID Vault
-data ClaimType
-  = KYC_VERIFIED
-  | AML_CLEAR
-  | ACCREDITED_INVESTOR
-  | RWA_ELIGIBLE
+data Status = Active | Suspended
   deriving (Eq, Show)
 
-template Attestation
+type IdentityKey = (Party, Text)
+
+template Identity
   with
-    issuer         : Party                        -- issuer (bank/compliance)
-    subject        : Party                        -- identity owner
-    identityCid    : ContractId Identity.Identity -- linked identity contract
-    claimType      : ClaimType
-    dataHash       : Text                         -- hash of off-ledger data
-    validFrom      : Time
-    validUntil     : Time
-    revoked        : Bool
+    owner : Party
+    identityId : Text
+    name : Text
+    status : Status
     extraObservers : [Party]
   where
-    signatory issuer
-    observer subject, extraObservers
+    signatory owner
+    observer extraObservers
 
-    ensure validFrom < validUntil
+    key (owner, identityId) : IdentityKey
+    maintainer key._1
 
-    ---------------------------------------------------------------------------
-    -- Lifecycle choices
-    ---------------------------------------------------------------------------
-
-    -- Revoke the attestation
-    choice Revoke : ContractId Attestation
-      controller issuer
-      do
-        assertMsg "Attestation already revoked" (not revoked)
-        archive self
-        create this with revoked = True
-
-    -- Extend the validity period
-    choice ExtendValidity : ContractId Attestation
+    choice AddExtraObservers : ContractId Identity
       with
-        newValidUntil : Time
-      controller issuer
+        newObservers : [Party]
+      controller owner
       do
-        now <- getTime
-        assertMsg "New expiry must be in the future"
-          (newValidUntil > now && newValidUntil > validUntil)
-        archive self
-        create this with validUntil = newValidUntil
+        let updatedObservers = dedup $ filter (/= owner) (extraObservers ++ newObservers)
+        create this with extraObservers = updatedObservers
 
--- Helper function for checking if an attestation is active
-isActive : Attestation -> Time -> Bool
-isActive att now =
-  (not att.revoked)
-    && att.validFrom <= now
-    && now <= att.validUntil
+    choice RemoveExtraObserver : ContractId Identity
+      with
+        observerToRemove : Party
+      controller owner
+      do
+        let updatedObservers = delete observerToRemove extraObservers
+        create this with extraObservers = updatedObservers
+
+    choice Deactivate : ContractId Identity
+      controller owner
+      do
+        assertMsg "Identity is not Active" (status == Active)
+        create this with status = Suspended
+
+    choice Reactivate : ContractId Identity
+      controller owner
+      do
+        assertMsg "Identity is not Suspended" (status == Suspended)
+        create this with status = Active
